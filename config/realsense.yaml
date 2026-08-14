@@ -1,0 +1,59 @@
+/device/head_camera/realsense_node:
+  ros__parameters:
+    # カメラの基本設定
+    camera_name: "head_camera"
+    serial_no: ""
+    usb_port_id: ""
+    device_type: "d435"
+
+    # ─────────────────────────────────────────────
+    # ステレオカメラとして使用（本番機を想定した構成）
+    # 深度センサー機能（IRプロジェクター由来の深度）は使わない
+    # ─────────────────────────────────────────────
+    enable_infra1: true
+    enable_infra2: true
+    enable_depth: false      # 本番のステレオカメラには深度出力が無い想定なのでOFF
+    enable_color: false      # RGBも使わない（本番はモノクロステレオの想定）
+    enable_sync: true        # infra1/infra2 のタイムスタンプ同期
+
+    # 点群はD435内部では生成しない（RTAB-Map側でステレオ視差から生成する）
+    enable_pointcloud: false
+    pointcloud.enable: false
+
+    # IRプロジェクター（ドットパターン）を無効化
+    # → ONのままだとステレオマッチングにノイズが乗るため
+    depth_module.emitter_enabled: 0
+
+    # 解像度とフレームレート
+    # D435では infra1/infra2/depth は同じdepth moduleセンサーから出ているため
+    # depth_module.profile 一つで解像度・フレームレートが決まる。
+    # （infra1_profile/infra2_profileという個別パラメータは現行のrealsense-rosには存在しない）
+    #
+    # 640x480 だと stereo_odometry の1フレーム処理に約300msかかり、
+    # 30fpsの画像に演算が追いつかず Odometry lost / TF未来参照エラーが
+    # 頻発したため、解像度を下げて負荷を軽減する
+    depth_module.profile: "424x240x30"
+
+    # フィルターは深度専用なので基本不要（無効化）
+    decimation_filter.enable: false
+    spatial_filter.enable: false
+    temporal_filter.enable: false
+    hole_filling_filter.enable: false
+
+    # その他の設定
+    publish_tf: true
+    # カメラ画像(30Hz)に対してTFの更新が遅いと、stereo_odometryや
+    # rtabmapがTF参照時に「未来のタイムスタンプ」要求エラーを起こすため、
+    # 画像のフレームレートと同程度以上に上げておく
+    tf_publish_rate: 30.0
+
+    # QoS設定（infra画像に対して設定）
+    qos_overrides:
+      /device/head_camera/infra1/image_rect_raw:
+        reliability: "BEST_EFFORT"
+      /device/head_camera/infra2/image_rect_raw:
+        reliability: "BEST_EFFORT"
+      /device/head_camera/infra1/camera_info:
+        reliability: "BEST_EFFORT"
+      /device/head_camera/infra2/camera_info:
+        reliability: "BEST_EFFORT"

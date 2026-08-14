@@ -1,0 +1,120 @@
+/**:
+  ros__parameters:
+    # ─────────────────────────────────────────────
+    # 共通: シミュレーション時間を使わない
+    # ─────────────────────────────────────────────
+    use_sim_time: false
+
+# ─────────────────────────────────────────────
+# stereo_odometry ノードのパラメータ
+# ─────────────────────────────────────────────
+stereo_odometry:
+  ros__parameters:
+    use_sim_time: false
+    frame_id: "base_footprint"
+    odom_frame_id: "odom"
+    publish_tf: true
+
+    # realsense.yaml で infra1/infra2 の配信QoSを BEST_EFFORT にしているため、
+    # 購読側もBEST_EFFORTに合わせないとQoS不一致でメッセージが一切届かない。
+    # qos: 0=SystemDefault(Reliable), 1=Reliable, 2=BestEffort
+    qos: 2
+
+    approx_sync: true      # 左右画像のタイムスタンプが完全一致しない場合に必要
+
+    # 処理遅延でTFがまだ更新されていない場合に備えて待機時間を延長
+    # (デフォルト0.1sだと処理が重い時にTF lookupが間に合わずOdometryが失われる)
+    wait_for_transform: 1.0
+
+    # Visual Odometry (ステレオ視差ベース)
+    Odom/Strategy: "0"           # 0=Frame-to-Map (BoW)
+    Odom/ResetCountdown: "15"
+
+    # 特徴検出器: ORB (軽量)
+    Vis/FeatureType: "9"         # 9=ORB
+    Vis/MaxFeatures: "300"       # 500→300 (解像度を下げた分、処理速度に余裕ができたら増やしてOK)
+
+    # ステレオマッチングの視差範囲
+    # 近距離(1m未満)で特徴点が大量に棄却される場合は最大視差を広げる
+    Stereo/MaxDisparity: "160"
+    Stereo/MinDisparity: "1"
+
+# ─────────────────────────────────────────────
+# rtabmap ノードのパラメータ
+# ─────────────────────────────────────────────
+rtabmap:
+  ros__parameters:
+    use_sim_time: false
+
+    # フレーム設定
+    frame_id: "base_footprint"          # ロボット基準フレーム
+    map_frame_id: "map"
+    odom_frame_id: "odom"
+
+    # ─────────────────────────────────────────────
+    # ステレオ入力として動作させる
+    # （実際のトピック名は launch ファイル側の remappings で
+    #   left/image_rect, right/image_rect, left/camera_info,
+    #   right/camera_info に紐付ける）
+    # ─────────────────────────────────────────────
+    subscribe_stereo: true
+    subscribe_depth: false
+    subscribe_rgb: false
+    subscribe_odom_info: true
+    approx_sync: true
+
+    # stereo_odometry と同様の理由でBEST_EFFORTに合わせる
+    qos: 2
+
+    # ─────────────────────────────────────────────
+    # RTAB-Map アルゴリズムパラメータ
+    # ─────────────────────────────────────────────
+    # ループクロージャ検出の最小反復間隔 (s)
+    Rtabmap/DetectionRate: "1"
+
+    # 地図更新の最小移動距離 (m) / 最小回転角度 (rad)
+    Rtabmap/LinearUpdate: "0.1"
+    Rtabmap/AngularUpdate: "0.1"
+
+    # RGBD設定名だが、ステレオ入力にも共通して使われるパラメータ
+    RGBD/AngularUpdate: "0.1"
+    RGBD/LinearUpdate: "0.1"
+    RGBD/OptimizeFromGraphEnd: "false"
+    RGBD/CreateOccupancyGrid: "true"   # 2D占有格子地図も同時生成
+    RGBD/ProximityBySpace: "true"
+    RGBD/ProximityMaxPaths: "3"
+
+    # 特徴検出器: ORB (軽量、stereo_odometryと同じ設定に揃える)
+    Vis/FeatureType: "9"       # 9=ORB
+    Vis/MaxFeatures: "300"
+
+    # ステレオマッチングの視差範囲（stereo_odometryと合わせる）
+    Stereo/MaxDisparity: "160"
+    Stereo/MinDisparity: "1"
+
+    # メモリ管理
+    Mem/STMSize: "30"
+    Mem/InitWMWithAllNodes: "false"
+
+    # 深度フィルタ（ステレオ視差から得られる距離範囲: 0.3m〜3.5m）
+    Grid/MaxGroundAngle: "45"
+    Grid/MinClusterSize: "10"
+    Grid/RangeMax: "3.5"
+    Grid/RangeMin: "0.3"
+    Grid/RayTracing: "true"
+    Grid/3D: "true"            # 3D占有格子地図を生成
+
+    # 点群の間引き (Voxel Grid)
+    Grid/CellSize: "0.05"
+
+# ─────────────────────────────────────────────
+# rtabmapviz (可視化ノード) のパラメータ
+# ─────────────────────────────────────────────
+rtabmapviz:
+  ros__parameters:
+    use_sim_time: false
+    frame_id: "base_footprint
+    "
+    odom_frame_id: "odom"
+    subscribe_stereo: true
+    subscribe_odom_info: true
