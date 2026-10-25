@@ -4,7 +4,7 @@
 
 ## ブランチ運用
 
-- `main` / `develop` 直commit・直push禁止。`feature/*` → `develop` → `main` のPRのみ
+- `main` 直commit・直push禁止。`feature/*` → `main` のPRのみ
 - 1コミット1話題
 
 ## ビルド
