@@ -1,0 +1,31 @@
+# パッケージのルートで doxygen Doxyfile を実行する。
+PROJECT_NAME = "mapping-3d"
+OUTPUT_DIRECTORY = docs/generated
+OUTPUT_LANGUAGE = Japanese
+INPUT_ENCODING = UTF-8
+INPUT = "docs/doxygen.dox" "launch/realsense.launch.py" "launch/realsense_infra_stereo.launch.py" "launch/rtabmap.launch.py" "launch/rtabmap_official.launch.py"
+FILE_PATTERNS = *.dox *.c *.cc *.cpp *.h *.hpp *.ino *.py *.java
+EXTENSION_MAPPING = ino=C++
+RECURSIVE = NO
+EXAMPLE_PATH = .
+EXAMPLE_RECURSIVE = YES
+EXTRACT_ALL = YES
+EXTRACT_STATIC = YES
+EXTRACT_PRIVATE = NO
+SOURCE_BROWSER = YES
+INLINE_SOURCES = NO
+STRIP_FROM_PATH = .
+FULL_PATH_NAMES = YES
+PYTHON_DOCSTRING = NO
+GENERATE_HTML = YES
+GENERATE_LATEX = NO
+GENERATE_XML = NO
+HAVE_DOT = NO
+QUIET = YES
+WARNINGS = YES
+WARN_IF_UNDOCUMENTED = NO
+WARN_AS_ERROR = YES
+WARN_LOGFILE = docs/generated/warnings.log
+
+# 他の資料とブラウザのメニュー設定を共有しない。
+HTML_PROJECT_COOKIE = mirs_docs_mapping_3d_v2

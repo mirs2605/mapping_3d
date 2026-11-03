@@ -1,6 +1,6 @@
-"""RealSense D435i/D455 IR stereo mapping with RTAB-Map.
+"""RealSense D435i/D455の左右の赤外画像を使い、RTAB-Mapで地図を作る。
 
-The left and right infrared streams are used as a stereo pair:
+次の左右の赤外画像をステレオ画像として使う。
   /camera/infra1/image_rect_raw
   /camera/infra2/image_rect_raw
 """
